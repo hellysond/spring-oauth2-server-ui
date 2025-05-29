@@ -42,7 +42,7 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
 
     @Override
     public String getDescription() {
-        return "";
+        return "init insert configuration data";
     }
 
     @Override
@@ -141,6 +141,32 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
                 insertAdminUser.setTimestamp(6, Timestamp.from(Instant.now()));
                 insertAdminUser.executeUpdate();
             }
+
+            String insertClientScopesSql = "insert into client_scopes (client_id, scope) values(?,?)";
+
+            try (PreparedStatement insertClientScopes = connection.prepareStatement(insertClientScopesSql)) {
+
+                insertClientScopes.setString(1,clientId);
+                insertClientScopes.setString(2, "read");
+                insertClientScopes.addBatch();
+
+                insertClientScopes.setString(1,clientId);
+                insertClientScopes.setString(2, "openid");
+                insertClientScopes.addBatch();
+
+                insertClientScopes.executeBatch();
+
+            }
+
+            String insertClientRedirectUris = "insert into client_redirect_uris (client_id, redirect_uri) values(?,?)";
+
+            try (PreparedStatement insertClientRedirectUri = connection.prepareStatement(insertClientRedirectUris)) {
+                insertClientRedirectUri.setString(1,clientId);
+                insertClientRedirectUri.setString(2, "http://localhost/admin");
+                insertClientRedirectUri.executeUpdate();
+
+            }
+
 
 
         }

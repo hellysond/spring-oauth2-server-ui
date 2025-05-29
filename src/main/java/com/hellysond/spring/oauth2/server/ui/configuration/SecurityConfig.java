@@ -55,7 +55,8 @@ public class SecurityConfig {
 			)
 			.exceptionHandling((exceptions) -> exceptions
 				.defaultAuthenticationEntryPointFor(
-					new LoginUrlAuthenticationEntryPoint("/login"),
+					new LoginUrlAuthenticationEntryPoint("/oauth2/authorize?response_type=code&client_id=spring-oauth2-server-ui\n" +
+							"&redirect_uri=http://localhost:8080/admin&scope=openid%20read"),
 					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 				)
 			);
