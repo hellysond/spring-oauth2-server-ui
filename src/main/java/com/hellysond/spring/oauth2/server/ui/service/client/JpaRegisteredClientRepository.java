@@ -70,21 +70,8 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 				.redirectUris((uris) -> uris.addAll(clientEntity.getRedirectUris()))
 				.postLogoutRedirectUris((uris) -> uris.addAll(clientEntity.getPostLogoutRedirectUris()))
 				.scopes((scopes) -> scopes.addAll(clientEntity.getScopes()))
-				.clientSettings(ClientSettings.builder()
-					.jwkSetUrl(clientEntity.getSettings().getJwkSetUrl())
-					.requireAuthorizationConsent(clientEntity.getSettings().isRequireAuthorizationConsent())
-					.tokenEndpointAuthenticationSigningAlgorithm(resolveJwsAlgorithm(clientEntity.getSettings()
-							.getTokenEndpointAuthenticationSigningAlgorithmEntity().getSigningAlgorithm()))
-					.x509CertificateSubjectDN(clientEntity.getSettings().getX509CertificateSubjectDn())
-					.requireProofKey(clientEntity.getSettings().isRequireProofKey())
-				.build())
-				.tokenSettings(TokenSettings.builder()
-					.deviceCodeTimeToLive(clientEntity.getTokenSettings().getDeviceCodeTimeToLive())
-					.idTokenSignatureAlgorithm(SignatureAlgorithm.from(clientEntity.getTokenSettings().getIdTokenSignatureAlgorithm().getSigningAlgorithm()))
-					.refreshTokenTimeToLive(clientEntity.getTokenSettings().getRefreshTokenTimeToLive())
-					.reuseRefreshTokens(clientEntity.getTokenSettings().isReuseRefreshTokens())
-					.x509CertificateBoundAccessTokens(clientEntity.getTokenSettings().isX509CertificateBoundAccessTokens())
-				.build());
+				.clientSettings(toObject(clientEntity.getSettings()))
+				.tokenSettings(toObject(clientEntity.getTokenSettings()));
 
 		return builder.build();
 	}
@@ -128,6 +115,33 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 		clientSettingsEntity.setTokenEndpointAuthenticationSigningAlgorithmEntity(resolveSigningAlgorithmEntity(clientSettings.getTokenEndpointAuthenticationSigningAlgorithm().getName()));
 		clientSettingsEntity.setX509CertificateSubjectDn(clientSettings.getX509CertificateSubjectDN());
 		return clientSettingsEntity;
+	}
+
+	TokenSettings toObject(ClientTokenSettingsEntity clientTokenSettingsEntity){
+		return TokenSettings.builder()
+				.deviceCodeTimeToLive(clientTokenSettingsEntity.getDeviceCodeTimeToLive())
+				.idTokenSignatureAlgorithm(SignatureAlgorithm.from(clientTokenSettingsEntity.getIdTokenSignatureAlgorithm().getSigningAlgorithm()))
+				.refreshTokenTimeToLive(clientTokenSettingsEntity.getRefreshTokenTimeToLive())
+				.reuseRefreshTokens(clientTokenSettingsEntity.isReuseRefreshTokens())
+				.x509CertificateBoundAccessTokens(clientTokenSettingsEntity.isX509CertificateBoundAccessTokens())
+			.build();
+	}
+
+	ClientSettings toObject(ClientSettingsEntity clientSettingsEntity){
+		ClientSettings.Builder clientSettings = ClientSettings.builder()
+				.requireAuthorizationConsent(clientSettingsEntity.isRequireAuthorizationConsent())
+				.tokenEndpointAuthenticationSigningAlgorithm(resolveJwsAlgorithm(clientSettingsEntity
+				.getTokenEndpointAuthenticationSigningAlgorithmEntity().getSigningAlgorithm()))
+				.requireProofKey(clientSettingsEntity.isRequireProofKey());
+
+		if(clientSettingsEntity.getX509CertificateSubjectDn()!=null)
+			clientSettings.x509CertificateSubjectDN(clientSettingsEntity.getX509CertificateSubjectDn());
+
+		if(clientSettingsEntity.getJwkSetUrl()!=null)
+			clientSettings.jwkSetUrl(clientSettingsEntity.getJwkSetUrl());
+
+		return clientSettings.build();
+
 	}
 
 	Set<AuthorizationGrantTypeEntity> resolveAuthorizationGrantType(Set<AuthorizationGrantType> authorizationGrantTypes){

@@ -3,17 +3,19 @@ package com.hellysond.spring.oauth2.server.ui.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.util.UUID;
 
 @Entity
 @Table(name = "authentication_method")
 public class AuthenticationMethodEntity {
 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Size(max = 35)
-    @Column(name = "id", nullable = false, length = 35)
+    @JdbcTypeCode(Types.CHAR)
+    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 
     @Size(max = 255)
