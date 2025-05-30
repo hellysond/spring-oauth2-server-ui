@@ -6,13 +6,16 @@ import org.flywaydb.core.api.migration.JavaMigration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +33,7 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
     Set<ClientAuthenticationMethod> authenticationMethods = Set.of(CLIENT_SECRET_BASIC,
             CLIENT_SECRET_POST,CLIENT_SECRET_JWT,PRIVATE_KEY_JWT,NONE,TLS_CLIENT_AUTH,SELF_SIGNED_TLS_CLIENT_AUTH);
 
+    SignatureAlgorithm[] signiningAlgorithms = SignatureAlgorithm.values();
 
     public V0_0_2_INSERT_INITIAL_CONFIGURATION(PasswordEncoder passwordEncoder){
         this.passwordEncoder = passwordEncoder;
@@ -59,9 +63,25 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
     public void migrate(Context context) throws Exception {
 
         try (Connection connection = context.getConnection()) {
+
+            String insertSigningAlgorithmSql = "insert into public.signing_algorithm (id, signing_algorithm) values (?,?)";
+
+            Map<String,UUID> mapSigningAlgorithmToUUID = mapSigningAlgorithmToUUID();
+
+            try(PreparedStatement insertSigningAlgorithm = connection.prepareStatement(insertSigningAlgorithmSql)){
+
+                for(Map.Entry<String, UUID> entry : mapSigningAlgorithmToUUID.entrySet()){
+                    insertSigningAlgorithm.setString(1, String.valueOf(entry.getValue()));
+                    insertSigningAlgorithm.setString(2,entry.getKey());
+                    insertSigningAlgorithm.addBatch();
+                }
+                insertSigningAlgorithm.executeBatch();
+            }
+
             String insertAdminClientSql = "insert into " +
                     "client (id, client_id, client_id_issued_at, client_secret, client_secret_expires_at, client_name) " +
                     "values (?,?,?,?,?,?)";
+
 
             String clientId = UUID.randomUUID().toString();
 
@@ -110,7 +130,6 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
 
             String insertAdminClientAuthenticationMethodSql = "insert into client_authentication_methods (client_id, authentication_method_id)" +
                     " values (?,?)";
-
 
             try (PreparedStatement insertClientAuthenticationMethod = connection.prepareStatement(insertAdminClientAuthenticationMethodSql)) {
 
@@ -164,15 +183,48 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
                 insertClientRedirectUri.setString(1,clientId);
                 insertClientRedirectUri.setString(2, "http://localhost/admin");
                 insertClientRedirectUri.executeUpdate();
-
             }
 
+            String insertClientTokenSettingsSql = "insert into client_token_settings (id, authorization_code_time_to_live, access_token_time_to_live, access_token_format," +
+                "device_code_time_to_live, reuse_refresh_tokens, refresh_token_time_to_live, id_token_signature_algorithm, x509_certificate_bound_access_tokens) " +
+                    "values(?,?,?,?,?,?,?,?,?)";
 
+            try (PreparedStatement insertClientTokenSettings = connection.prepareStatement(insertClientTokenSettingsSql)) {
+
+                insertClientTokenSettings.setString(1,clientId);
+                insertClientTokenSettings.setLong(2,  Duration.ofMinutes(5).toNanos());
+                insertClientTokenSettings.setLong(3,Duration.ofMinutes(5).toNanos());
+                insertClientTokenSettings.setString(4, OAuth2TokenFormat.SELF_CONTAINED.getValue());
+                insertClientTokenSettings.setLong(5,Duration.ofMinutes(5).toNanos());
+                insertClientTokenSettings.setInt(6,1);
+                insertClientTokenSettings.setLong(7,Duration.ofMinutes(5).toNanos());
+                insertClientTokenSettings.setString(8, String.valueOf(mapSigningAlgorithmToUUID.get(SignatureAlgorithm.RS256.getName())));
+                insertClientTokenSettings.setInt(9, 0);
+                insertClientTokenSettings.executeUpdate();
+            }
+
+            String insertClientSettingsSql = "insert into client_settings (id, require_proof_key, require_authorization_consent, jwk_set_url, " +
+                "token_endpoint_authentication_signing_algorithm, x509_certificate_subject_dn) values(?,?,?,?,?,?)";
+
+            try (PreparedStatement insertClientSettings = connection.prepareStatement(insertClientSettingsSql)) {
+
+                insertClientSettings.setString(1,clientId);
+                insertClientSettings.setInt(2, 0);
+                insertClientSettings.setInt(3, 0);
+                insertClientSettings.setString(4, null);
+                insertClientSettings.setString(5, String.valueOf(mapSigningAlgorithmToUUID.get(SignatureAlgorithm.RS256.getName())));
+                insertClientSettings.setString(6, null);
+                insertClientSettings.executeUpdate();
+
+            }
 
         }
 
     }
 
+    private Map<String,UUID> mapSigningAlgorithmToUUID(){
+        return Arrays.stream(signiningAlgorithms).collect(Collectors.toMap(SignatureAlgorithm::getName,e->UUID.randomUUID()));
+    }
 
     private Map<String,UUID> mapAuthorizationGrantTypeToUUID(Set<AuthorizationGrantType> authorizationGrantTypes){
         return authorizationGrantTypes.stream().collect(Collectors.toMap(AuthorizationGrantType::getValue,e->UUID.randomUUID()));

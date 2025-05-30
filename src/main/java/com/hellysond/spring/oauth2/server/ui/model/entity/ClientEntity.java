@@ -18,7 +18,7 @@ public class ClientEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @JdbcTypeCode(Types.CHAR)
-    @Column(name = "id", nullable = false, length = 35,columnDefinition = "uniqueidentifier")
+    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 
     @Size(max = 255)

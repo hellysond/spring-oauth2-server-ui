@@ -78,10 +78,10 @@ public class SecurityConfig {
 	}
 
 	@Bean 
-	public UserDetailsService userDetailsService() {
-		UserDetails userDetails = User.withDefaultPasswordEncoder()
+	public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+		UserDetails userDetails = User.builder()
 				.username("user")
-				.password("password")
+				.password(passwordEncoder.encode("password"))
 				.roles("USER")
 				.build();
 
