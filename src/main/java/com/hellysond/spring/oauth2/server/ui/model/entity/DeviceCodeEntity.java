@@ -1,22 +1,22 @@
 package com.hellysond.spring.oauth2.server.ui.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "device_code")
 public class DeviceCodeEntity {
 
+    @GeneratedValue
+    @UuidGenerator
     @Id
-    @Size(max = 35)
-    @Column(name = "id", nullable = false, length = 35)
-    private String id;
+    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
+    private UUID id;
 
     @Size(max = 4000)
     @ColumnDefault("NULL")
@@ -34,11 +34,11 @@ public class DeviceCodeEntity {
     @Column(name = "device_code_metadata", length = 2000)
     private String deviceCodeMetadata;
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

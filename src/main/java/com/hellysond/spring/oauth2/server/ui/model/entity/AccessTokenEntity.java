@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.time.Instant;
@@ -14,14 +15,14 @@ import java.util.UUID;
 @Table(name = "access_token")
 public class AccessTokenEntity {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 
     @Size(max = 4000)
-    @ColumnDefault("NULL")
     @Column(name = "access_token_value", length = 4000)
     private String accessTokenValue;
 

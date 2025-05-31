@@ -4,15 +4,14 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.hellysond.spring.oauth2.server.ui.model.entity.AuthorizationEntity;
-import com.hellysond.spring.oauth2.server.ui.model.entity.AuthorizationGrantTypeEntity;
-import com.hellysond.spring.oauth2.server.ui.model.entity.ClientEntity;
+import com.hellysond.spring.oauth2.server.ui.model.entity.*;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationGrantTypeEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.ClientEntityRepository;
@@ -180,11 +179,18 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		//entity.setAttributes(writeMap(authorization.getAttributes()));
 		entity.setState(authorization.getAttribute(OAuth2ParameterNames.STATE));
 
+		entity.setAuthorizationCodeEntity(new AuthorizationCodeEntity());
+		entity.setUserCode(new UserCodeEntity());
+		entity.setAccessTokenEntity(new AccessTokenEntity());
+		entity.setDeviceCodeEntity(new DeviceCodeEntity());
+		entity.setRefreshTokenEntity(new RefreshTokenEntity());
+		entity.setOidcIdTokenEntity(new OidcIdTokenEntity());
+
 		OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
 				authorization.getToken(OAuth2AuthorizationCode.class);
 
 
-		var authorizationCodeEntity = entity.getAuthorizationCodeEntity();
+		AuthorizationCodeEntity authorizationCodeEntity = new AuthorizationCodeEntity();
 
 		setTokenValues(
 				authorizationCode,
@@ -309,11 +315,11 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		} else if (AuthorizationGrantType.DEVICE_CODE.getValue().equals(authorizationGrantType)) {
 			return AuthorizationGrantType.DEVICE_CODE;
 		}
-		return new AuthorizationGrantType(authorizationGrantType);              // Custom authorization grant type
+		return new AuthorizationGrantType(authorizationGrantType);
 	}
 
 	public ClientEntity resolveClientEntity(String clientId){
-		return clientEntityRepository.findByClientId(clientId).orElseThrow();
+		return clientEntityRepository.findById(UUID.fromString(clientId)).orElseThrow();
 	}
 
 	public AuthorizationGrantTypeEntity resolveAuthorizationGrantTypeEntity(String value){

@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,7 +180,7 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
 
             try (PreparedStatement insertClientRedirectUri = connection.prepareStatement(insertClientRedirectUris)) {
                 insertClientRedirectUri.setString(1,clientId);
-                insertClientRedirectUri.setString(2, "http://localhost/admin");
+                insertClientRedirectUri.setString(2, "http://127.0.0.1:7860".trim());
                 insertClientRedirectUri.executeUpdate();
             }
 

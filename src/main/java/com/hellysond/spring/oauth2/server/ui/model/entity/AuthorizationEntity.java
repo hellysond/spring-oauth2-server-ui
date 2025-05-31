@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.util.Set;
@@ -13,7 +14,8 @@ import java.util.UUID;
 @Table(name = "\"authorization\"")
 public class AuthorizationEntity {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
@@ -71,8 +73,10 @@ public class AuthorizationEntity {
     @Column(name="scope")
     private Set<String> scopes;
 
+    /*
     @OneToOne
     private AuthorizationRequestEntity authorizationRequestEntity;
+     */
 
     public UUID getId() {
         return id;
@@ -160,14 +164,6 @@ public class AuthorizationEntity {
 
     public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
-    }
-
-    public AuthorizationRequestEntity getAuthorizationRequestEntity() {
-        return authorizationRequestEntity;
-    }
-
-    public void setAuthorizationRequestEntity(AuthorizationRequestEntity authorizationRequestEntity) {
-        this.authorizationRequestEntity = authorizationRequestEntity;
     }
 
     public AuthorizationCodeEntity getAuthorizationCodeEntity() {
