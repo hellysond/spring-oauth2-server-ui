@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.time.Instant;
@@ -15,7 +16,8 @@ import java.util.UUID;
 @Table(name = "client")
 public class ClientEntity {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")

@@ -55,8 +55,7 @@ public class SecurityConfig {
 			)
 			.exceptionHandling((exceptions) -> exceptions
 				.defaultAuthenticationEntryPointFor(
-					new LoginUrlAuthenticationEntryPoint("/oauth2/authorize?response_type=code&client_id=spring-oauth2-server-ui\n" +
-							"&redirect_uri=http://localhost:8080/admin&scope=openid%20read"),
+					new LoginUrlAuthenticationEntryPoint("/login"),
 					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 				)
 			);
@@ -81,7 +80,7 @@ public class SecurityConfig {
 	public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
 		UserDetails userDetails = User.builder()
 				.username("user")
-				.password(passwordEncoder.encode("password"))
+				.password(passwordEncoder.encode("admin"))
 				.roles("USER")
 				.build();
 

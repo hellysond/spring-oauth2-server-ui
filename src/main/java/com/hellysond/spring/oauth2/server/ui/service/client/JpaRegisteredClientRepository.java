@@ -73,6 +73,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 				.clientSettings(toObject(clientEntity.getSettings()))
 				.tokenSettings(toObject(clientEntity.getTokenSettings()));
 
+
 		return builder.build();
 	}
 
