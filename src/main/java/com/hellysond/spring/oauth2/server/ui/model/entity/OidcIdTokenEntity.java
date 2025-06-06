@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "oidc_id_token")
 public class OidcIdTokenEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

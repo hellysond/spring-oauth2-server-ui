@@ -3,8 +3,10 @@ package com.hellysond.spring.oauth2.server.ui.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Types;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -12,9 +14,9 @@ import java.util.UUID;
 @Table(name = "device_code")
 public class DeviceCodeEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
+    @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 

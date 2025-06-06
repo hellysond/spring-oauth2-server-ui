@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "authorization_request")
 public class AuthorizationRequestEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

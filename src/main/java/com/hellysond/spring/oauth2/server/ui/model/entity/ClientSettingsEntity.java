@@ -12,8 +12,6 @@ import java.util.UUID;
 @Table(name = "client_settings")
 public class ClientSettingsEntity {
 
-
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

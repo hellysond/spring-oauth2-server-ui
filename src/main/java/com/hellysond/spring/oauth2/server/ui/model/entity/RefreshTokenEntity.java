@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "refresh_token")
 public class RefreshTokenEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

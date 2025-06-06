@@ -14,14 +14,12 @@ import java.util.UUID;
 @Table(name = "\"authorization\"")
 public class AuthorizationEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "registered_client_id", nullable = false)
     private ClientEntity registeredClientEntity;

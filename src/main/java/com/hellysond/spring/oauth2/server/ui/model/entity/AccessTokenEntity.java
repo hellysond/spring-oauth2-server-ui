@@ -15,7 +15,6 @@ import java.util.UUID;
 @Table(name = "access_token")
 public class AccessTokenEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

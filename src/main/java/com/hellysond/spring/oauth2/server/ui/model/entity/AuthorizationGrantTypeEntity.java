@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "authorization_grant_type")
 public class AuthorizationGrantTypeEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

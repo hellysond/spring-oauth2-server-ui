@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "authentication_method")
 public class AuthenticationMethodEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
