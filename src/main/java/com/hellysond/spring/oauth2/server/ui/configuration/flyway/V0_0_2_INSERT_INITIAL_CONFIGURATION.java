@@ -133,7 +133,7 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
             try (PreparedStatement insertClientAuthenticationMethod = connection.prepareStatement(insertAdminClientAuthenticationMethodSql)) {
 
                 insertClientAuthenticationMethod.setString(1,clientId);
-                insertClientAuthenticationMethod.setString(2, String.valueOf(mapAuthenticationMethods.get(CLIENT_SECRET_BASIC.getValue())));
+                insertClientAuthenticationMethod.setString(2, String.valueOf(mapAuthenticationMethods.get(CLIENT_SECRET_POST.getValue())));
                 insertClientAuthenticationMethod.executeUpdate();
             }
 

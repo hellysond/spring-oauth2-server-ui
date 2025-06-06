@@ -15,6 +15,7 @@ import com.hellysond.spring.oauth2.server.ui.model.entity.*;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationGrantTypeEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.ClientEntityRepository;
+import org.hibernate.validator.internal.constraintvalidators.bv.number.bound.decimal.DecimalMaxValidatorForBigDecimal;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -33,6 +34,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 @Component
@@ -58,6 +60,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 	@Override
 	public void save(OAuth2Authorization authorization) {
 		Assert.notNull(authorization, "authorization cannot be null");
+
 		this.authorizationEntityRepository.save(toEntity(authorization));
 	}
 
@@ -73,6 +76,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		return this.authorizationEntityRepository.findById(id).map(this::toObject).orElse(null);
 	}
 
+	@Transactional
 	@Override
 	public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
 		Assert.hasText(token, "token cannot be empty");
@@ -102,8 +106,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 	}
 
 	private OAuth2Authorization toObject(AuthorizationEntity entity) {
-		RegisteredClient registeredClient = this.registeredClientRepository.findById(entity.getId().toString());
-
+		RegisteredClient registeredClient = this.registeredClientRepository.findById(entity.getRegisteredClientEntity().getId().toString());
 
 		OAuth2Authorization.Builder builder = OAuth2Authorization.withRegisteredClient(registeredClient)
 				.id(entity.getId().toString())
@@ -179,16 +182,8 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		//entity.setAttributes(writeMap(authorization.getAttributes()));
 		entity.setState(authorization.getAttribute(OAuth2ParameterNames.STATE));
 
-		entity.setAuthorizationCodeEntity(new AuthorizationCodeEntity());
-		entity.setUserCode(new UserCodeEntity());
-		entity.setAccessTokenEntity(new AccessTokenEntity());
-		entity.setDeviceCodeEntity(new DeviceCodeEntity());
-		entity.setRefreshTokenEntity(new RefreshTokenEntity());
-		entity.setOidcIdTokenEntity(new OidcIdTokenEntity());
-
 		OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
 				authorization.getToken(OAuth2AuthorizationCode.class);
-
 
 		AuthorizationCodeEntity authorizationCodeEntity = new AuthorizationCodeEntity();
 
@@ -200,9 +195,10 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 				authorizationCodeEntity::setAuthorizationCodeMetadata
 		);
 
-		var accessTokenEntity = entity.getAccessTokenEntity();
+		var accessTokenEntity = new AccessTokenEntity();
 
 		OAuth2Authorization.Token<OAuth2AccessToken> accessToken =
+
 				authorization.getToken(OAuth2AccessToken.class);
 		setTokenValues(
 				accessToken,
@@ -218,7 +214,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		OAuth2Authorization.Token<OAuth2RefreshToken> refreshToken =
 				authorization.getToken(OAuth2RefreshToken.class);
 
-		var refreshTokenEntity = entity.getRefreshTokenEntity();
+		var refreshTokenEntity = new RefreshTokenEntity();
 
 		setTokenValues(
 				refreshToken,
@@ -231,7 +227,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		OAuth2Authorization.Token<OidcIdToken> oidcIdToken =
 				authorization.getToken(OidcIdToken.class);
 
-		var oidcIdTokenEntity = entity.getOidcIdTokenEntity();
+		var oidcIdTokenEntity = new OidcIdTokenEntity();
 
 		setTokenValues(
 				oidcIdToken,
@@ -247,7 +243,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		OAuth2Authorization.Token<OAuth2UserCode> userCode =
 				authorization.getToken(OAuth2UserCode.class);
 
-		var userCodeEntity = entity.getUserCode();
+		var userCodeEntity = new UserCodeEntity();
 
 		setTokenValues(
 				userCode,
@@ -260,7 +256,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		OAuth2Authorization.Token<OAuth2DeviceCode> deviceCode =
 				authorization.getToken(OAuth2DeviceCode.class);
 
-		var deviceCodeEntity = entity.getDeviceCodeEntity();
+		var deviceCodeEntity = new DeviceCodeEntity();
 
 		setTokenValues(
 				deviceCode,
@@ -269,6 +265,13 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 				deviceCodeEntity::setDeviceCodeExpiresAt,
 				deviceCodeEntity::setDeviceCodeMetadata
 		);
+
+		entity.setAuthorizationCodeEntity(authorizationCodeEntity);
+		entity.setUserCode(userCodeEntity);
+		entity.setAccessTokenEntity(accessTokenEntity);
+		entity.setDeviceCodeEntity(deviceCodeEntity);
+		entity.setRefreshTokenEntity(refreshTokenEntity);
+		entity.setOidcIdTokenEntity(oidcIdTokenEntity);
 
 		return entity;
 	}

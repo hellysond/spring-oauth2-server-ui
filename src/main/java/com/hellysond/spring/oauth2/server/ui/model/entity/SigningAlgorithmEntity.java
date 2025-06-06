@@ -12,7 +12,6 @@ import java.util.UUID;
 @Table(name = "signing_algorithm")
 public class SigningAlgorithmEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

@@ -14,7 +14,6 @@ import java.util.UUID;
 @Table(name = "user_code")
 public class UserCodeEntity {
 
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)

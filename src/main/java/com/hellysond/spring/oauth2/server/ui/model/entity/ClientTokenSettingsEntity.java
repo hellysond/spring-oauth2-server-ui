@@ -13,8 +13,6 @@ import java.util.UUID;
 @Table(name = "client_token_settings")
 public class ClientTokenSettingsEntity {
 
-
-    @GeneratedValue
     @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
