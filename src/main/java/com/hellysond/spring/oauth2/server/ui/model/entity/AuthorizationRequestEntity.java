@@ -8,13 +8,13 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "authorization_request")
 public class AuthorizationRequestEntity {
 
-    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
@@ -25,7 +25,6 @@ public class AuthorizationRequestEntity {
     @JoinColumn(name = "id", nullable = false)
     private AuthorizationEntity authorizationEntity;
 
-    @Size(max = 255)
     @NotNull
     @Column(name = "authorization_uri", nullable = false)
     private String authorizationUri;
@@ -35,32 +34,27 @@ public class AuthorizationRequestEntity {
     @JoinColumn(name = "authorization_grant_type", nullable = false)
     private AuthorizationGrantTypeEntity authorizationGrantTypeEntity;
 
-    @Size(max = 255)
     @Column(name = "response_type")
     private String responseType;
 
-    @Size(max = 35)
     @NotNull
     @Column(name = "client_id", nullable = false, length = 35)
     private String clientId;
 
-    @Size(max = 255)
     @NotNull
     @Column(name = "redirect_uri", nullable = false)
     private String redirectUri;
 
-    @Size(max = 255)
     @Column(name = "state")
     private String state;
 
-    @Size(max = 255)
     @Column(name = "authorization_request_uri")
     private String authorizationRequestUri;
 
     @ElementCollection
     @CollectionTable(name="authorization_request_scope", joinColumns=@JoinColumn(name="authorization_request_id"))
     @Column(name="authorization_request_scope")
-    private List<String> scopes;
+    private Set<String> scopes;
 
     public UUID getId() {
         return id;
@@ -134,11 +128,11 @@ public class AuthorizationRequestEntity {
         this.authorizationRequestUri = authorizationRequestUri;
     }
 
-    public List<String> getScopes() {
+    public Set<String> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
+    public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
     }
 }
