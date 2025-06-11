@@ -25,7 +25,6 @@ public class AuthorizationRequestEntity {
     @JoinColumn(name = "id", nullable = false)
     private AuthorizationEntity authorizationEntity;
 
-    @Size(max = 255)
     @NotNull
     @Column(name = "authorization_uri", nullable = false)
     private String authorizationUri;
@@ -35,25 +34,20 @@ public class AuthorizationRequestEntity {
     @JoinColumn(name = "authorization_grant_type", nullable = false)
     private AuthorizationGrantTypeEntity authorizationGrantTypeEntity;
 
-    @Size(max = 255)
     @Column(name = "response_type")
     private String responseType;
 
-    @Size(max = 35)
     @NotNull
     @Column(name = "client_id", nullable = false, length = 35)
     private String clientId;
 
-    @Size(max = 255)
     @NotNull
     @Column(name = "redirect_uri", nullable = false)
     private String redirectUri;
 
-    @Size(max = 255)
     @Column(name = "state")
     private String state;
 
-    @Size(max = 255)
     @Column(name = "authorization_request_uri")
     private String authorizationRequestUri;
 
