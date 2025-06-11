@@ -71,10 +71,11 @@ public class AuthorizationEntity {
     @Column(name="scope")
     private Set<String> scopes;
 
-    /*
-    @OneToOne
+
+    @OneToOne(mappedBy = "authorizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
     private AuthorizationRequestEntity authorizationRequestEntity;
-     */
+
 
     public UUID getId() {
         return id;
@@ -178,5 +179,14 @@ public class AuthorizationEntity {
 
     public void setOidcIdTokenEntity(OidcIdTokenEntity oidcIdTokenEntity) {
         this.oidcIdTokenEntity = oidcIdTokenEntity;
+    }
+
+    public AuthorizationRequestEntity getAuthorizationRequestEntity() {
+        return authorizationRequestEntity;
+    }
+
+    public void setAuthorizationRequestEntity(AuthorizationRequestEntity authorizationRequestEntity) {
+        authorizationRequestEntity.setAuthorization(this);
+        this.authorizationRequestEntity = authorizationRequestEntity;
     }
 }

@@ -206,15 +206,14 @@ state VARCHAR(255),
 authorization_request_uri VARCHAR(255),
 FOREIGN KEY(authorization_grant_type) REFERENCES authorization_grant_type (id),
 FOREIGN KEY(id) REFERENCES "authorization"(id),
-FOREIGN KEY(id) REFERENCES client(id),
 PRIMARY KEY(id)
 );
 
 CREATE TABLE authorization_request_scope (
 authorization_request_id CHAR(36) NOT NULL,
-authorization_request VARCHAR(255),
+authorization_request_scope VARCHAR(255),
 FOREIGN KEY(authorization_request_id) REFERENCES authorization_request(id),
-PRIMARY KEY(authorization_request_id, authorization_request)
+PRIMARY KEY(authorization_request_id, authorization_request_scope)
 );
 
 CREATE TABLE authorization_server_settings (

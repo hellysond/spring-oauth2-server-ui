@@ -8,13 +8,13 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "authorization_request")
 public class AuthorizationRequestEntity {
 
-    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
@@ -60,7 +60,7 @@ public class AuthorizationRequestEntity {
     @ElementCollection
     @CollectionTable(name="authorization_request_scope", joinColumns=@JoinColumn(name="authorization_request_id"))
     @Column(name="authorization_request_scope")
-    private List<String> scopes;
+    private Set<String> scopes;
 
     public UUID getId() {
         return id;
@@ -134,11 +134,11 @@ public class AuthorizationRequestEntity {
         this.authorizationRequestUri = authorizationRequestUri;
     }
 
-    public List<String> getScopes() {
+    public Set<String> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
+    public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
     }
 }
