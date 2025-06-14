@@ -186,7 +186,9 @@ public class AuthorizationEntity {
     }
 
     public void setAuthorizationRequestEntity(AuthorizationRequestEntity authorizationRequestEntity) {
-        authorizationRequestEntity.setAuthorization(this);
-        this.authorizationRequestEntity = authorizationRequestEntity;
+        if(authorizationRequestEntity!=null){
+            authorizationRequestEntity.setAuthorization(this);
+            this.authorizationRequestEntity = authorizationRequestEntity;
+        }
     }
 }

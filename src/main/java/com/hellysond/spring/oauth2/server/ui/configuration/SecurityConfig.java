@@ -77,17 +77,6 @@ public class SecurityConfig {
 	}
 
 	@Bean 
-	public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-		UserDetails userDetails = User.builder()
-				.username("user")
-				.password(passwordEncoder.encode("admin"))
-				.roles("USER")
-				.build();
-
-		return new InMemoryUserDetailsManager(userDetails);
-	}
-
-	@Bean 
 	public JWKSource<SecurityContext> jwkSource() {
 		KeyPair keyPair = generateRsaKey();
 		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();

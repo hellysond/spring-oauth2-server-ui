@@ -274,18 +274,23 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 
 	private AuthorizationRequestEntity toEntity(OAuth2AuthorizationRequest object){
 
-		AuthorizationRequestEntity entity = new AuthorizationRequestEntity();
-		entity.setAuthorizationUri(object.getAuthorizationUri());
-		entity.setAuthorizationGrantType(resolveAuthorizationGrantTypeEntity(object.getGrantType().getValue()));
-		entity.setClientId(object.getClientId());
-		entity.setResponseType(object.getResponseType().getValue());
-		entity.setRedirectUri(object.getRedirectUri());
-		entity.setScopes(object.getScopes());
-		entity.setState(object.getState());
-		entity.setAuthorizationRequestUri(object.getAuthorizationRequestUri());
+		if(object!=null){
+			AuthorizationRequestEntity entity = new AuthorizationRequestEntity();
+			entity.setAuthorizationUri(object.getAuthorizationUri());
+			entity.setAuthorizationGrantType(resolveAuthorizationGrantTypeEntity(object.getGrantType().getValue()));
+			entity.setClientId(object.getClientId());
+			entity.setResponseType(object.getResponseType().getValue());
+			entity.setRedirectUri(object.getRedirectUri());
+			entity.setScopes(object.getScopes());
+			entity.setState(object.getState());
+			entity.setAuthorizationRequestUri(object.getAuthorizationRequestUri());
 
-		return entity;
+			return entity;
+		}else{
+			return null;
+		}
 	}
+
 
 	private OAuth2AuthorizationRequest toObject(AuthorizationRequestEntity entity){
 

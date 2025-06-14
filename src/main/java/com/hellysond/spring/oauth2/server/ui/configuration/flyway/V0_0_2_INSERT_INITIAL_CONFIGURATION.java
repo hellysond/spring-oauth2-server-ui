@@ -144,7 +144,13 @@ public class V0_0_2_INSERT_INITIAL_CONFIGURATION implements JavaMigration {
 
                 insertAdminClientGrantType.setString(1,clientId);
                 insertAdminClientGrantType.setString(2, String.valueOf(mapAuthorizationGrantType.get(AUTHORIZATION_CODE.getValue())));
-                insertAdminClientGrantType.executeUpdate();
+                insertAdminClientGrantType.addBatch();
+
+                insertAdminClientGrantType.setString(1,clientId);
+                insertAdminClientGrantType.setString(2, String.valueOf(mapAuthorizationGrantType.get(CLIENT_CREDENTIALS.getValue())));
+                insertAdminClientGrantType.addBatch();
+
+                insertAdminClientGrantType.executeBatch();
             }
 
             String insertAdminUserSql = "insert into \"user\" (id, username, password, enabled, email, created_at) values (?,?,?,?,?,?)";
