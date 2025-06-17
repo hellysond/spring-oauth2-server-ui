@@ -1,5 +1,6 @@
 package com.hellysond.spring.oauth2.server.ui.service.authorization;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
@@ -8,11 +9,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.hellysond.spring.oauth2.server.ui.model.UserPrincipal;
 import com.hellysond.spring.oauth2.server.ui.model.entity.*;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationGrantTypeEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.ClientEntityRepository;
 import org.hibernate.validator.internal.constraintvalidators.bv.number.bound.decimal.DecimalMaxValidatorForBigDecimal;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.oauth2.client.AuthorizationCodeGrantDsl;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -57,6 +60,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 	}
 
 	@Override
+	@Transactional
 	public void save(OAuth2Authorization authorization) {
 		Assert.notNull(authorization, "authorization cannot be null");
 
@@ -170,7 +174,9 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		}
 
 		Map<String,Object> attributes = new HashMap<>();
+
 		attributes.put(OAuth2AuthorizationRequest.class.getName(),toObject(entity.getAuthorizationRequestEntity()));
+		attributes.put(Principal.class.getName(),toObject(entity.getUser()));
 
 		builder.attributes(m->m.putAll(attributes));
 
@@ -185,7 +191,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		entity.setScopes(authorization.getAuthorizedScopes());
 		entity.setState(authorization.getAttribute(OAuth2ParameterNames.STATE));
 		entity.setAuthorizationRequestEntity(toEntity((OAuth2AuthorizationRequest) authorization.getAttribute(OAuth2AuthorizationRequest.class.getName())));
-
+		entity.setUser(resolveUserEntity(authorization.getAttribute(Principal.class.getName())));
 
 		OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode =
 				authorization.getToken(OAuth2AuthorizationCode.class);
@@ -270,6 +276,22 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 		}
 
 		return entity;
+	}
+
+	private UsernamePasswordAuthenticationToken toObject(UserEntity userEntity){
+		if(userEntity!=null)
+			return new UsernamePasswordAuthenticationToken(new UserPrincipal(userEntity),new ArrayList<>());
+		else
+			return null;
+	}
+
+	private UserEntity resolveUserEntity(UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken){
+		if(usernamePasswordAuthenticationToken!=null){
+			var userPrincipal = (UserPrincipal) usernamePasswordAuthenticationToken.getPrincipal();
+			return userPrincipal.getUser();
+		}else{
+			return null;
+		}
 	}
 
 	private AuthorizationRequestEntity toEntity(OAuth2AuthorizationRequest object){
