@@ -62,7 +62,7 @@ public class AuthorizationEntity {
     @JoinColumn(name = "device_code_id", referencedColumnName = "id")
     private DeviceCodeEntity deviceCodeEntity;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserEntity user;
 
