@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .logout-btn-container {
+            margin-top: 30px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Registered Users</h2>
+
+    <div class="logout-btn-container">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-warning">Logout</button>
+        </form>
+    </div>
+
+    <table class="table table-striped table-bordered mt-4">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${user}">
+            <td th:text="${u.id}">1</td>
+            <td th:text="${u.username}">${u.username}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

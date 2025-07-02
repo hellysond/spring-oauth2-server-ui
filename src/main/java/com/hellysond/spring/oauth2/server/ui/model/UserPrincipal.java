@@ -2,10 +2,10 @@ package com.hellysond.spring.oauth2.server.ui.model;
 
 import com.hellysond.spring.oauth2.server.ui.model.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public  class UserPrincipal implements UserDetails {
 
@@ -20,9 +20,16 @@ public  class UserPrincipal implements UserDetails {
     }
 
     @Override
-         public Collection<? extends GrantedAuthority> getAuthorities() {
-             return List.of();
-         }
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+
+        authorities.add(new SimpleGrantedAuthority("admin"));
+
+
+        return authorities;
+    }
 
          @Override
          public String getPassword() {

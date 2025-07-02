@@ -8,6 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -63,15 +64,32 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	@Bean 
+	@Bean
 	@Order(2)
+	public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http)
+			throws Exception {
+		http
+				.securityMatcher("/dashboard")
+				.authorizeHttpRequests((authorize) -> authorize
+						.requestMatchers(HttpMethod.GET).permitAll()
+				)
+				.oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
+
+		return http.build();
+
+	}
+
+
+		@Bean
+	@Order(3)
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
 			throws Exception {
 		http
 			.authorizeHttpRequests((authorize) -> authorize
 				.anyRequest().authenticated()
 			)
-			.formLogin(Customizer.withDefaults());
+
+		.formLogin(Customizer.withDefaults());
 
 		return http.build();
 	}
