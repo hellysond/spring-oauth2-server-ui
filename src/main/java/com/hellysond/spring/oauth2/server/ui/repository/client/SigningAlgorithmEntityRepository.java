@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface SigningAlgorithmEntityRepository extends JpaRepository<SigningAlgorithmEntity, UUID> {
-
-    Optional<SigningAlgorithmEntity> findBySigningAlgorithm(String value);
-
+public interface SigningAlgorithmEntityRepository
+        extends JpaRepository<SigningAlgorithmEntity, String> {
 }

@@ -1,5 +1,6 @@
 package com.hellysond.spring.oauth2.server.ui.model.entity;
 
+import com.hellysond.spring.oauth2.server.ui.converter.BooleanToIntegerConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -25,9 +26,11 @@ public class ClientSettingsEntity {
     private ClientEntity clientEntity;
 
     @Column(name = "require_proof_key")
+    @Convert(converter = BooleanToIntegerConverter.class)
     private boolean requireProofKey;
 
     @Column(name = "require_authorization_consent")
+    @Convert(converter = BooleanToIntegerConverter.class)
     private boolean requireAuthorizationConsent;
 
     @Size(max = 255)
@@ -88,5 +91,13 @@ public class ClientSettingsEntity {
 
     public void setX509CertificateSubjectDn(String x509CertificateSubjectDn) {
         this.x509CertificateSubjectDn = x509CertificateSubjectDn;
+    }
+
+    public ClientEntity getClientEntity() {
+        return clientEntity;
+    }
+
+    public void setClientEntity(ClientEntity clientEntity) {
+        this.clientEntity = clientEntity;
     }
 }

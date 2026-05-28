@@ -1,35 +1,23 @@
 package com.hellysond.spring.oauth2.server.ui.model.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.sql.Types;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "authentication_method")
 public class AuthenticationMethodEntity {
 
-    @UuidGenerator
     @Id
-    @JdbcTypeCode(Types.CHAR)
-    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
-    private UUID id;
-
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "authentication_method", nullable = false)
+    @Column(name = "authentication_method", length = 50, nullable = false)
     private String authenticationMethod;
 
-    public UUID getId() {
-        return id;
+    protected AuthenticationMethodEntity() {
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public AuthenticationMethodEntity(String authenticationMethod) {
+        this.authenticationMethod = authenticationMethod;
     }
 
     public String getAuthenticationMethod() {

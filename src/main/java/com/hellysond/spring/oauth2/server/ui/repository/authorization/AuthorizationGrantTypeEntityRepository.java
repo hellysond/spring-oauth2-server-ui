@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface AuthorizationGrantTypeEntityRepository extends JpaRepository<AuthorizationGrantTypeEntity, UUID> {
-
-     Optional<AuthorizationGrantTypeEntity> findByAuthorizationGrantType(String value);
+public interface AuthorizationGrantTypeEntityRepository
+        extends JpaRepository<AuthorizationGrantTypeEntity, String> {
 }

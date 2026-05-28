@@ -346,6 +346,6 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 	}
 
 	public AuthorizationGrantTypeEntity resolveAuthorizationGrantTypeEntity(String value){
-		return authorizationGrantTypeEntityRepository.findByAuthorizationGrantType(value).orElseThrow();
+		return authorizationGrantTypeEntityRepository.findById(value).orElseThrow();
 	}
 }

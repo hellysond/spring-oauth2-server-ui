@@ -8,7 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface AuthenticationMethodEntityRepository extends JpaRepository<AuthenticationMethodEntity,UUID> {
+public interface AuthenticationMethodEntityRepository
+        extends JpaRepository<AuthenticationMethodEntity, String> {
 
     Optional<AuthenticationMethodEntity> findByAuthenticationMethod(String value);
 

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "authorization_request")
 public class AuthorizationRequestEntity {
 
+    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")

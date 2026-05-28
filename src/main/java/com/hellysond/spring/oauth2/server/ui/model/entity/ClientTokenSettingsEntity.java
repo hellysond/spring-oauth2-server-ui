@@ -1,5 +1,6 @@
 package com.hellysond.spring.oauth2.server.ui.model.entity;
 
+import com.hellysond.spring.oauth2.server.ui.converter.BooleanToIntegerConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -18,7 +19,6 @@ public class ClientTokenSettingsEntity {
     @JdbcTypeCode(Types.CHAR)
     @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
-
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -39,16 +39,18 @@ public class ClientTokenSettingsEntity {
     private Duration deviceCodeTimeToLive;
 
     @Column(name = "reuse_refresh_tokens")
+    @Convert(converter = BooleanToIntegerConverter.class)
     private boolean reuseRefreshTokens;
 
     @Column(name = "refresh_token_time_to_live")
     private Duration refreshTokenTimeToLive;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_token_signature_algorithm")
     private SigningAlgorithmEntity idTokenSignatureAlgorithm;
 
     @Column(name = "x509_certificate_bound_access_tokens")
+    @Convert(converter = BooleanToIntegerConverter.class)
     private boolean x509CertificateBoundAccessTokens;
 
     public UUID getId() {
@@ -121,5 +123,13 @@ public class ClientTokenSettingsEntity {
 
     public void setX509CertificateBoundAccessTokens(boolean x509CertificateBoundAccessTokens) {
         this.x509CertificateBoundAccessTokens = x509CertificateBoundAccessTokens;
+    }
+
+    public ClientEntity getClientEntity() {
+        return clientEntity;
+    }
+
+    public void setClientEntity(ClientEntity clientEntity) {
+        this.clientEntity = clientEntity;
     }
 }

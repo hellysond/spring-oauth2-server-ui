@@ -1,33 +1,23 @@
 package com.hellysond.spring.oauth2.server.ui.model.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.sql.Types;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "signing_algorithm")
 public class SigningAlgorithmEntity {
 
-    @UuidGenerator
     @Id
-    @JdbcTypeCode(Types.CHAR)
-    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
-    private UUID id;
-
-    @Size(max = 255)
-    @Column(name = "signing_algorithm")
+    @Column(name = "signing_algorithm", length = 50, nullable = false)
     private String signingAlgorithm;
 
-    public UUID getId() {
-        return id;
+    protected SigningAlgorithmEntity() {
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public SigningAlgorithmEntity(String signingAlgorithm) {
+        this.signingAlgorithm = signingAlgorithm;
     }
 
     public String getSigningAlgorithm() {

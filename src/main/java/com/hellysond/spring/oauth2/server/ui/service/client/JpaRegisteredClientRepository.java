@@ -9,6 +9,7 @@ import com.hellysond.spring.oauth2.server.ui.repository.client.AuthenticationMet
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationGrantTypeEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.ClientEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.SigningAlgorithmEntityRepository;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
@@ -49,23 +50,21 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 	}
 
 	@Override
-	@Transactional
-	public RegisteredClient findByClientId(String clientId) {
+    public RegisteredClient findByClientId(String clientId) {
 		Assert.hasText(clientId, "clientId cannot be empty");
 		return this.clientEntityRepository.findByClientId(clientId).map(this::toObject).orElse(null);
 	}
 
 	private RegisteredClient toObject(ClientEntity clientEntity) {
-
 		RegisteredClient.Builder builder = RegisteredClient.withId(clientEntity.getId().toString())
 				.clientId(clientEntity.getClientId())
 				.clientIdIssuedAt(clientEntity.getClientIdIssuedAt())
 				.clientSecret(clientEntity.getClientSecret())
 				.clientSecretExpiresAt(clientEntity.getClientSecretExpiresAt())
 				.clientName(clientEntity.getClientName())
-				.clientAuthenticationMethods(authenticationMethods -> clientEntity.getAuthenticationMethodEntities().forEach(authenticationMethod ->
+				.clientAuthenticationMethods(authenticationMethods -> clientEntity.getAuthenticationMethods().forEach(authenticationMethod ->
 								authenticationMethods.add(new ClientAuthenticationMethod(authenticationMethod.getAuthenticationMethod()))))
-				.authorizationGrantTypes((grantTypes) -> clientEntity.getAuthorizationGrantTypeEntities().forEach(grantType ->
+				.authorizationGrantTypes((grantTypes) -> clientEntity.getAuthorizationGrantTypes().forEach(grantType ->
 								grantTypes.add(new AuthorizationGrantType(grantType.getAuthorizationGrantType()))))
 				.redirectUris((uris) -> uris.addAll(clientEntity.getRedirectUris()))
 				.postLogoutRedirectUris((uris) -> uris.addAll(clientEntity.getPostLogoutRedirectUris()))
@@ -73,30 +72,33 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 				.clientSettings(toObject(clientEntity.getSettings()))
 				.tokenSettings(toObject(clientEntity.getTokenSettings()));
 
-
 		return builder.build();
 	}
 
 	private ClientEntity toEntity(RegisteredClient registeredClient) {
-		ClientEntity entity = new ClientEntity();
-		entity.setId(UUID.fromString(registeredClient.getId()));
+        UUID id = UUID.fromString(registeredClient.getId());
+
+        ClientEntity entity = new ClientEntity();
+
+        entity.setId(id);
 		entity.setClientId(registeredClient.getClientId());
 		entity.setClientIdIssuedAt(registeredClient.getClientIdIssuedAt());
 		entity.setClientSecret(registeredClient.getClientSecret());
 		entity.setClientSecretExpiresAt(registeredClient.getClientSecretExpiresAt());
 		entity.setClientName(registeredClient.getClientName());
-		entity.setAuthenticationMethodEntities(resolveAuthenticationMethod(registeredClient.getClientAuthenticationMethods()));
-		entity.setAuthorizationGrantTypeEntities(resolveAuthorizationGrantType(registeredClient.getAuthorizationGrantTypes()));
+		entity.setAuthenticationMethods(resolveAuthenticationMethod(registeredClient.getClientAuthenticationMethods()));
+		entity.setAuthorizationGrantTypes(resolveAuthorizationGrantType(registeredClient.getAuthorizationGrantTypes()));
 		entity.setRedirectUris(registeredClient.getRedirectUris());
 		entity.setPostLogoutRedirectUris(registeredClient.getPostLogoutRedirectUris());
 		entity.setScopes(registeredClient.getScopes());
-		entity.setSettings(toEntity(registeredClient.getClientSettings()));
-		entity.setTokenSettings(toEntity(registeredClient.getTokenSettings()));
+		entity.setSettings(toEntity(registeredClient.getClientSettings(), entity));
+		entity.setTokenSettings(toEntity(registeredClient.getTokenSettings(), entity));
 		return entity;
 	}
 
-	private ClientTokenSettingsEntity toEntity(TokenSettings tokenSettings){
+	private ClientTokenSettingsEntity toEntity(TokenSettings tokenSettings, ClientEntity clientEntity){
 		ClientTokenSettingsEntity clientTokenSettingsEntity = new ClientTokenSettingsEntity();
+		clientTokenSettingsEntity.setClientEntity(clientEntity);
 		clientTokenSettingsEntity.setAccessTokenFormat(tokenSettings.getAccessTokenFormat().getValue());
 		clientTokenSettingsEntity.setAccessTokenTimeToLive(tokenSettings.getAccessTokenTimeToLive());
 		clientTokenSettingsEntity.setAuthorizationCodeTimeToLive(tokenSettings.getAuthorizationCodeTimeToLive());
@@ -104,36 +106,55 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 		clientTokenSettingsEntity.setRefreshTokenTimeToLive(tokenSettings.getDeviceCodeTimeToLive());
 		clientTokenSettingsEntity.setReuseRefreshTokens(tokenSettings.isReuseRefreshTokens());
 		clientTokenSettingsEntity.setX509CertificateBoundAccessTokens(tokenSettings.isX509CertificateBoundAccessTokens());
-		clientTokenSettingsEntity.setIdTokenSignatureAlgorithm(resolveSigningAlgorithmEntity(tokenSettings.getIdTokenSignatureAlgorithm().getName()));
+
+
+        if (tokenSettings.getIdTokenSignatureAlgorithm() != null) {
+            clientTokenSettingsEntity.setIdTokenSignatureAlgorithm(
+                    resolveSigningAlgorithmEntity(tokenSettings.getIdTokenSignatureAlgorithm().getName())
+            );
+        }
 		return clientTokenSettingsEntity;
 	}
 
-	private ClientSettingsEntity toEntity(ClientSettings clientSettings){
+	private ClientSettingsEntity toEntity(ClientSettings clientSettings, ClientEntity clientEntity){
 		ClientSettingsEntity clientSettingsEntity = new ClientSettingsEntity();
+		clientSettingsEntity.setClientEntity(clientEntity);
 		clientSettingsEntity.setJwkSetUrl(clientSettings.getJwkSetUrl());
 		clientSettingsEntity.setRequireAuthorizationConsent(clientSettings.isRequireAuthorizationConsent());
 		clientSettingsEntity.setRequireProofKey(clientSettings.isRequireProofKey());
-		clientSettingsEntity.setTokenEndpointAuthenticationSigningAlgorithmEntity(resolveSigningAlgorithmEntity(clientSettings.getTokenEndpointAuthenticationSigningAlgorithm().getName()));
+
+		if (clientSettings.getTokenEndpointAuthenticationSigningAlgorithm() != null) {
+			clientSettingsEntity.setTokenEndpointAuthenticationSigningAlgorithmEntity(
+					resolveSigningAlgorithmEntity(clientSettings.getTokenEndpointAuthenticationSigningAlgorithm().getName())
+			);
+		}
 		clientSettingsEntity.setX509CertificateSubjectDn(clientSettings.getX509CertificateSubjectDN());
 		return clientSettingsEntity;
 	}
 
 	TokenSettings toObject(ClientTokenSettingsEntity clientTokenSettingsEntity){
-		return TokenSettings.builder()
+		TokenSettings.Builder builder = TokenSettings.builder()
 				.deviceCodeTimeToLive(clientTokenSettingsEntity.getDeviceCodeTimeToLive())
-				.idTokenSignatureAlgorithm(SignatureAlgorithm.from(clientTokenSettingsEntity.getIdTokenSignatureAlgorithm().getSigningAlgorithm()))
 				.refreshTokenTimeToLive(clientTokenSettingsEntity.getRefreshTokenTimeToLive())
 				.reuseRefreshTokens(clientTokenSettingsEntity.isReuseRefreshTokens())
-				.x509CertificateBoundAccessTokens(clientTokenSettingsEntity.isX509CertificateBoundAccessTokens())
-			.build();
+				.x509CertificateBoundAccessTokens(clientTokenSettingsEntity.isX509CertificateBoundAccessTokens());
+		if (clientTokenSettingsEntity.getIdTokenSignatureAlgorithm() != null) {
+			builder.idTokenSignatureAlgorithm(
+					SignatureAlgorithm.from(clientTokenSettingsEntity.getIdTokenSignatureAlgorithm().getSigningAlgorithm())
+			);
+		}
+		return builder.build();
 	}
 
 	ClientSettings toObject(ClientSettingsEntity clientSettingsEntity){
 		ClientSettings.Builder clientSettings = ClientSettings.builder()
 				.requireAuthorizationConsent(clientSettingsEntity.isRequireAuthorizationConsent())
-				.tokenEndpointAuthenticationSigningAlgorithm(resolveJwsAlgorithm(clientSettingsEntity
-				.getTokenEndpointAuthenticationSigningAlgorithmEntity().getSigningAlgorithm()))
 				.requireProofKey(clientSettingsEntity.isRequireProofKey());
+
+		if (clientSettingsEntity.getTokenEndpointAuthenticationSigningAlgorithmEntity() != null) {
+			clientSettings.tokenEndpointAuthenticationSigningAlgorithm(resolveJwsAlgorithm(clientSettingsEntity
+					.getTokenEndpointAuthenticationSigningAlgorithmEntity().getSigningAlgorithm()));
+		}
 
 		if(clientSettingsEntity.getX509CertificateSubjectDn()!=null)
 			clientSettings.x509CertificateSubjectDN(clientSettingsEntity.getX509CertificateSubjectDn());
@@ -147,7 +168,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 
 	Set<AuthorizationGrantTypeEntity> resolveAuthorizationGrantType(Set<AuthorizationGrantType> authorizationGrantTypes){
 		return authorizationGrantTypes.stream().map(authorizationGrantType -> authorizationGrantTypeEntityRepository
-				.findByAuthorizationGrantType(authorizationGrantType.getValue())
+                .findById(authorizationGrantType.getValue())
 			.orElseThrow(RuntimeException::new)).collect(Collectors.toSet());
 	}
 
@@ -158,7 +179,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 	}
 
 	SigningAlgorithmEntity resolveSigningAlgorithmEntity(String value){
-		return signingAlgorithmEntityRepository.findBySigningAlgorithm(value).orElseThrow();
+		return signingAlgorithmEntityRepository.findById(value).orElseThrow();
 	}
 
 	private JwsAlgorithm resolveJwsAlgorithm(String name){

@@ -16,15 +16,13 @@ import java.util.UUID;
 @Table(name = "client")
 public class ClientEntity {
 
-    @UuidGenerator
     @Id
     @JdbcTypeCode(Types.CHAR)
-    @Column(name = "id", nullable = false, length = 36,columnDefinition = "uniqueidentifier")
     private UUID id;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "client_id", nullable = false)
+    @Column(name = "client_id", nullable = false, unique = true)
     private String clientId;
 
     @NotNull
@@ -43,20 +41,29 @@ public class ClientEntity {
     @Column(name = "client_name", nullable = false)
     private String clientName;
 
-    @ElementCollection
-    @CollectionTable(name="client_redirect_uris", joinColumns=@JoinColumn(name="client_id"))
-    @Column(name="redirect_uri")
-    private Set<String> redirectUris;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "client_redirect_uris",
+            joinColumns = @JoinColumn(name = "client_id")
+    )
+    @Column(name = "redirect_uri")
+    private Set<String> redirectUris = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name="client_scopes", joinColumns=@JoinColumn(name="client_id"))
-    @Column(name="scope")
-    private Set<String> scopes;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "client_scopes",
+            joinColumns = @JoinColumn(name = "client_id")
+    )
+    @Column(name = "scope")
+    private Set<String> scopes = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name="client_post_logout_redirect_uris", joinColumns=@JoinColumn(name="client_id"))
-    @Column(name="post_logout_redirect_uri")
-    private Set<String> postLogoutRedirectUris;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "client_post_logout_redirect_uris",
+            joinColumns = @JoinColumn(name = "client_id")
+    )
+    @Column(name = "post_logout_redirect_uri")
+    private Set<String> postLogoutRedirectUris = new HashSet<>();
 
     @OneToOne(mappedBy = "clientEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private ClientSettingsEntity settings;
@@ -64,20 +71,21 @@ public class ClientEntity {
     @OneToOne(mappedBy = "clientEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private ClientTokenSettingsEntity tokenSettings;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "client_authentication_methods",
             joinColumns = @JoinColumn(name = "client_id"),
-            inverseJoinColumns = @JoinColumn(name = "authentication_method_id"))
-    private Set<AuthenticationMethodEntity> authenticationMethodEntities = new HashSet<>();
+            inverseJoinColumns = @JoinColumn(name = "authentication_method")
+    )
+    private Set<AuthenticationMethodEntity> authenticationMethods = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "client_authorization_grant_types",
             joinColumns = @JoinColumn(name = "client_id"),
-            inverseJoinColumns = @JoinColumn(name = "authorization_grant_type_id"))
-    private Set<AuthorizationGrantTypeEntity> authorizationGrantTypeEntities = new HashSet<>();
-
+            inverseJoinColumns = @JoinColumn(name = "authorization_grant_type")
+    )
+    private Set<AuthorizationGrantTypeEntity> authorizationGrantTypes = new HashSet<>();
 
     public UUID getId() {
         return id;
@@ -167,27 +175,19 @@ public class ClientEntity {
         this.tokenSettings = tokenSettings;
     }
 
-    public Set<AuthenticationMethodEntity> getAuthenticationMethodEntities() {
-        return authenticationMethodEntities;
+    public Set<AuthenticationMethodEntity> getAuthenticationMethods() {
+        return authenticationMethods;
     }
 
-    public void setAuthenticationMethodEntities(Set<AuthenticationMethodEntity> authenticationMethodEntities) {
-        this.authenticationMethodEntities = authenticationMethodEntities;
+    public void setAuthenticationMethods(Set<AuthenticationMethodEntity> authenticationMethods) {
+        this.authenticationMethods = authenticationMethods;
     }
 
-    public void addAuthenticationMethodEntity(AuthenticationMethodEntity authenticationMethodEntity){
-        this.authenticationMethodEntities.add(authenticationMethodEntity);
+    public Set<AuthorizationGrantTypeEntity> getAuthorizationGrantTypes() {
+        return authorizationGrantTypes;
     }
 
-    public void addAuthorizationGrantTypeEntity(AuthorizationGrantTypeEntity authorizationGrantTypeEntity){
-        this.authorizationGrantTypeEntities.add(authorizationGrantTypeEntity);
-    }
-
-    public Set<AuthorizationGrantTypeEntity> getAuthorizationGrantTypeEntities() {
-        return authorizationGrantTypeEntities;
-    }
-
-    public void setAuthorizationGrantTypeEntities(Set<AuthorizationGrantTypeEntity> authorizationGrantTypeEntities) {
-        this.authorizationGrantTypeEntities = authorizationGrantTypeEntities;
+    public void setAuthorizationGrantTypes(Set<AuthorizationGrantTypeEntity> authorizationGrantTypes) {
+        this.authorizationGrantTypes = authorizationGrantTypes;
     }
 }
