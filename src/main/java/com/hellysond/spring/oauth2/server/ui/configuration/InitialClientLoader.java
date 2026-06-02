@@ -32,15 +32,16 @@ public class InitialClientLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
-        if (repository.findByClientId("ui-server4") != null) {
+        if (repository.findByClientId("ui-server5") != null) {
             return;
         }
 
         RegisteredClient registeredClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("ui-server4")
+                        .clientId("ui-server5")
                         .clientIdIssuedAt(Instant.now())
                         .clientSecret(passwordEncoder.encode("secret"))
+                        .postLogoutRedirectUri("http://127.0.0.1:7860")
                         .clientAuthenticationMethod(
                                 ClientAuthenticationMethod.CLIENT_SECRET_POST)
                         .authorizationGrantType(

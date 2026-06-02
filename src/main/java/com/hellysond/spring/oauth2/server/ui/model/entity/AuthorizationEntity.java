@@ -71,6 +71,8 @@ public class AuthorizationEntity {
     @Column(name="scope")
     private Set<String> scopes;
 
+    @Column(name = "attributes", length = 4000)
+    private String attributes;
 
     @OneToOne(mappedBy = "authorizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
@@ -190,5 +192,13 @@ public class AuthorizationEntity {
             authorizationRequestEntity.setAuthorization(this);
             this.authorizationRequestEntity = authorizationRequestEntity;
         }
+    }
+
+    public String getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(String attributes) {
+        this.attributes = attributes;
     }
 }

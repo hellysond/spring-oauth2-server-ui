@@ -1,0 +1,28 @@
+server:
+  port: 8082
+
+logging:
+  level:
+    root: info
+
+spring:
+  application:
+    version: 0.1.0
+    name: spring-oauth2-server-ui
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB:spring_oauth2_server_ui}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+  thymeleaf:
+    check-template-location: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: true
+  main:
+    allow-circular-references: true

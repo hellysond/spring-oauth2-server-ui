@@ -189,6 +189,7 @@ CREATE TABLE "authorization" (
     authorization_code_id CHAR(36) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    attributes VARCHAR(4000) DEFAULT NULL,
 
     FOREIGN KEY(registered_client_id) REFERENCES client (id),
     FOREIGN KEY(authorization_grant_type) REFERENCES authorization_grant_type (authorization_grant_type),

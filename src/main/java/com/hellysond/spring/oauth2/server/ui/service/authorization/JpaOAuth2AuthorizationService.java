@@ -1,9 +1,7 @@
 package com.hellysond.spring.oauth2.server.ui.service.authorization;
 
 import java.security.Principal;
-import java.time.Instant;
 import java.util.*;
-import java.util.function.Consumer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
@@ -14,15 +12,12 @@ import com.hellysond.spring.oauth2.server.ui.model.entity.*;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.authorization.AuthorizationGrantTypeEntityRepository;
 import com.hellysond.spring.oauth2.server.ui.repository.client.ClientEntityRepository;
-import org.hibernate.validator.internal.constraintvalidators.bv.number.bound.decimal.DecimalMaxValidatorForBigDecimal;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.web.oauth2.client.AuthorizationCodeGrantDsl;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2DeviceCode;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.OAuth2UserCode;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -115,7 +110,8 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 				.id(entity.getId().toString())
 				.principalName(entity.getPrincipalName())
 				.authorizationGrantType(resolveAuthorizationGrantType(entity.getAuthorizationGrantTypeEntity().getAuthorizationGrantType()))
-				.authorizedScopes(entity.getScopes());
+				.authorizedScopes(entity.getScopes())
+				.attributes(attributes->attributes.putAll(parseMap(entity.getAttributes())));
 
 		if (entity.getState() != null) {
 			builder.attribute(OAuth2ParameterNames.STATE, entity.getState());
@@ -126,8 +122,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getAuthorizationCodeEntity() .getAuthorizationCodeValue(),
 					entity.getAuthorizationCodeEntity().getAuthorizationCodeIssuedAt(),
 					entity.getAuthorizationCodeEntity().getAuthorizationCodeExpiresAt());
-
-			builder.token(authorizationCode, metadata -> metadata.putAll(new HashMap<>()));
+			builder.token(authorizationCode, metadata -> metadata.putAll(parseMap(entity.getAuthorizationCodeEntity().getAuthorizationCodeMetadata())));
 		}
 
 		if (entity.getAccessTokenEntity() != null) {
@@ -137,7 +132,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getAccessTokenEntity().getAccessTokenIssuedAt(),
 					entity.getAccessTokenEntity().getAccessTokenExpiresAt(),
 					entity.getAccessTokenEntity().getScopes());
-			builder.token(accessToken, metadata -> metadata.putAll(new HashMap<>()));
+			builder.token(accessToken, metadata -> metadata.putAll(parseMap(entity.getAccessTokenEntity().getAccessTokenMetadata())));
 		}
 
 		if (entity.getRefreshTokenEntity() != null) {
@@ -145,7 +140,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getRefreshTokenEntity().getRefreshTokenValue(),
 					entity.getRefreshTokenEntity().getRefreshTokenIssuedAt(),
 					entity.getRefreshTokenEntity().getRefreshTokenExpiresAt());
-			builder.token(refreshToken, metadata -> metadata.putAll(new HashMap<>()));
+			builder.token(refreshToken, metadata -> metadata.putAll(parseMap(entity.getRefreshTokenEntity().getRefreshTokenMetadata())));
 		}
 
 		if (entity.getOidcIdTokenEntity() != null) {
@@ -153,8 +148,8 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getOidcIdTokenEntity().getOidcIdTokenValue(),
 					entity.getOidcIdTokenEntity().getOidcIdTokenIssuedAt(),
 					entity.getOidcIdTokenEntity().getOidcIdTokenExpiresAt(),
-					null);
-			builder.token(idToken, metadata -> metadata.putAll(new HashMap<>()));
+					parseMap(entity.getOidcIdTokenEntity().getOidcIdTokenClaims()));
+			builder.token(idToken, metadata -> metadata.putAll(parseMap(entity.getOidcIdTokenEntity().getOidcIdTokenMetadata())));
 		}
 
 		if (entity.getUserCode() != null) {
@@ -162,7 +157,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getUserCode().getUserCodeValue(),
 					entity.getUserCode().getUserCodeIssuedAt(),
 					entity.getUserCode().getUserCodeExpiresAt());
-			builder.token(userCode, metadata -> metadata.putAll(new HashMap<>()));
+			builder.token(userCode, metadata -> metadata.putAll(parseMap(entity.getUserCode().getUserCodeMetadata())));
 		}
 
 		if (entity.getDeviceCodeEntity() != null) {
@@ -170,7 +165,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 					entity.getDeviceCodeEntity().getDeviceCodeValue(),
 					entity.getDeviceCodeEntity().getDeviceCodeIssuedAt(),
 					entity.getDeviceCodeEntity().getDeviceCodeExpiresAt());
-			builder.token(deviceCode, metadata -> metadata.putAll(new HashMap<>()));
+			builder.token(deviceCode, metadata -> metadata.putAll(parseMap(entity.getDeviceCodeEntity().getDeviceCodeMetadata())));
 		}
 
 		Map<String,Object> attributes = new HashMap<>();
@@ -347,5 +342,22 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 
 	public AuthorizationGrantTypeEntity resolveAuthorizationGrantTypeEntity(String value){
 		return authorizationGrantTypeEntityRepository.findById(value).orElseThrow();
+	}
+
+	private Map<String, Object> parseMap(String data) {
+		try {
+			return this.objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (Exception ex) {
+			throw new IllegalArgumentException(ex.getMessage(), ex);
+		}
+	}
+
+	private String writeMap(Map<String, Object> metadata) {
+		try {
+			return this.objectMapper.writeValueAsString(metadata);
+		} catch (Exception ex) {
+			throw new IllegalArgumentException(ex.getMessage(), ex);
+		}
 	}
 }
